@@ -18,28 +18,27 @@ builder.Services.AddCors(opt =>
     opt.AddPolicy("CorsPolicy", builder =>
     {
         builder.AllowAnyHeader().AllowAnyMethod().SetIsOriginAllowed((host) => true).AllowCredentials();
-
-    });
-});//<-------------------------
-
-builder.Services.AddSignalR();//<-------------------------
-
-builder.Services.AddDbContext<SignalRContext>(x =>
-{
-    x.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection"), option =>
-    {
-        option.MigrationsAssembly(Assembly.GetAssembly(typeof(SignalRContext)).GetName().Name);
     });
 });
+
+builder.Services.AddSignalR();
+
+builder.Services.AddDbContext<SignalRContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection"), sqlOptions =>
+    {
+        sqlOptions.MigrationsAssembly(typeof(SignalRContext).Assembly.FullName);
+    });
+});
+
+
 
 builder.Services.AddControllersWithViews().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-//builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
@@ -48,19 +47,19 @@ builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder => containerB
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseCors("CorsPolicy");  //<-------------------------
-app.MapHub<SignalRHub>("/signalrhub");//<--------------
-app.UseHttpsRedirection();
+app.UseCors("CorsPolicy"); // CORS tanýmlamasýný routing'in önüne al
 
+app.UseHttpsRedirection();
+app.UseRouting(); // Routing middleware'ini ekleyin
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapHub<SignalRHub>("/signalrhub");
 
+app.MapControllers();
 app.Run();

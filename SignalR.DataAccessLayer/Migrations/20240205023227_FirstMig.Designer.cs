@@ -12,7 +12,7 @@ using SignalR.DataAccessLayer.Concrete;
 namespace SignalR.DataAccessLayer.Migrations
 {
     [DbContext(typeof(SignalRContext))]
-    [Migration("20240203045159_FirstMig")]
+    [Migration("20240205023227_FirstMig")]
     partial class FirstMig
     {
         /// <inheritdoc />
